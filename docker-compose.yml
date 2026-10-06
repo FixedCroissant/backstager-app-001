@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  # --- PostgreSQL Database ---
+  postgres:
+    image: postgres:15-alpine
+    container_name: backstage-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-backstage_plugin_catalog}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- Backstage Application ---
+  backstage:
+    #TODO: NOTE USE THE IMAGE YOU HAVE BUILD WITHIN THE Dockerfile
+    image: backstage:latest
+    container_name: backstage-app
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "7007:7007"
+    environment:
+      # Node and Host Configuration
+      NODE_ENV: production
+      PORT: 7007
+
+      # Database Connection (Connects to the 'postgres' service defined above)
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+      # Optional Integrations (Add GitHub / GitLab tokens here as needed)
+      # GITHUB_TOKEN: ${GITHUB_TOKEN}
+    volumes:
+      # Persist dynamically generated TechDocs or cached data
+      - backstage_data:/app/data
+
+volumes:
+  postgres_data:
+    driver: local
+  backstage_data:
+    driver: local

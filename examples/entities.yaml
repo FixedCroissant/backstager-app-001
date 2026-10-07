@@ -11,7 +11,10 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: example-website
+  name: example-website-BOOOP
+  annotations:
+    # Points directly to the folder containing mkdocs.yml
+    backstage.io/techdocs-ref: dir:./template/content/mkdocs.yml
 spec:
   type: website
   lifecycle: experimental
@@ -33,7 +36,7 @@ spec:
     syntax = "proto3";
 
     service Exampler {
-      rpc Example (ExampleMessage) returns (ExampleMessage) {};
+      rpc Example (ExampleMessageBoop) returns (ExampleMessage) {};
     }
 
     message ExampleMessage {

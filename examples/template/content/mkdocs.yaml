@@ -1,0 +1,6 @@
+site_name: My Service Documentation
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+plugins:
+  - techdocs-core

@@ -44,7 +44,7 @@
     "@types/jest": "^30.0.0",
     "jest": "~30.2.0",
     "jsdom": "^27.1.0",
-    "node-gyp": "^10.0.0",
+    "node-gyp": "^13.1.0",
     "prettier": "^2.3.2",
     "typescript": "~5.8.0"
   },
@@ -52,7 +52,14 @@
     "@yarnpkg/core": "4.9.1",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "node-gyp": "^10.2.0"
+    "node-gyp": "^10.2.0",
+    "handlebars": "4.7.10",
+    "tar": "^7.5.18",
+    "basic-ftp": "^6.2.1",
+    "@graphql-tools/utils": "^12.0.1",
+    "adm-zip": "0.6.1",
+    "undici": "7.29.1",
+    "http-cache-semantics": "4.3.0"
   },
   "prettier": "@backstage/cli/config/prettier",
   "lint-staged": {

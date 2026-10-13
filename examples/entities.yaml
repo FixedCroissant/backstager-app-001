@@ -14,7 +14,7 @@ metadata:
   name: example-website-BOOOP
   annotations:
     # Points directly to the folder containing mkdocs.yml
-    backstage.io/techdocs-ref: dir:./template/content/mkdocs.yml
+    backstage.io/techdocs-ref: dir:./template/content/
 spec:
   type: website
   lifecycle: experimental

@@ -48,26 +48,21 @@ RUN yarn tsc
 # GO TO BACK END AND CREATE BUILD
 RUN cd packages/backend && yarn build
 
-
-
-
-
-
 # BELOW ARE FOR BASIC DEBUGGING.
 #RUN yarn install --no-immutable && \
 #    ls -la packages/backend/src/index.ts && \
 #    yarn build:backend
 
-#RUN ls -la packages/backend/
+# RUN ls -la packages/backend/
 
-#RUN ls -la
+# RUN ls -la
 
 
 # # --- Stage 2: Runtime Stage ---
 FROM node:20.18-bookworm AS final
 WORKDIR /app
 
-# 1. Install runtime dependencies (including python3-venv for isolated PIP packages)
+# # 1. Install runtime OS dependencies & Python environment for TechDocs
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && \
@@ -76,31 +71,46 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     python3-pip \
     python3-venv \
     git \
-    curl
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# 2. Enable Corepack and Yarn 4 in runtime stage
+# 2. Set up isolated TechDocs Python Virtual Environment
+RUN python3 -m venv /opt/techdocs-venv && \
+    /opt/techdocs-venv/bin/pip install --no-cache-dir --upgrade pip && \
+    /opt/techdocs-venv/bin/pip install --no-cache-dir mkdocs-techdocs-core
+
+# 2 SET PATH for TECH DOCS TO GO
+ENV PATH="/opt/techdocs-venv/bin:$PATH"
+
+# 3. Enable Corepack and Yarn 4 in runtime stage
 RUN corepack enable && corepack prepare yarn@4.13.0 --activate    
 
-# 3. Copy root Yarn configuration so Berry knows how to resolve modules
+# 4. Copy root Yarn configuration so Berry knows how to resolve modules
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn ./.yarn
 
-# 4. Copy the bundle archive from Stage 1 (referenced as 'build')
+# 5. Copy the bundle archive from Stage 1 (referenced as 'build')
 COPY --from=installer /app/packages/backend/dist/bundle.tar.gz ./
 RUN tar xzf bundle.tar.gz && rm bundle.tar.gz
 
-# 4. Install production node_modules from skeleton yarn.lock
+# 6. Install production node_modules from skeleton yarn.lock
 # (Required because bundle.tar.gz only contains built JS, not node_modules)
 RUN --mount=type=cache,target=/root/.yarn/berry/cache,sharing=shared \
     yarn workspaces focus --all --production
 
-
-
-# 5. Copy configuration files
+# 7. Copy configuration files
 COPY app-config.yaml app-config.production.yaml ./
 
-# 6.
+# 8. Ensure non-root node user owns workspace for TEchdocs build caching
+RUN mkdir -p /app/.cache && chown node:node /app /app/.cache
+
+USER node
+
 EXPOSE 7007
 
-# 7. Run the backend entrypoint directly
+
+# 9. Run the backend entrypoint directly
 CMD ["node", "packages/backend", "--config", "app-config.yaml", "--config", "app-config.production.yaml"]
+
+
+

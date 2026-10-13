@@ -1,0 +1,7 @@
+# template/content/mkdocs.yml
+site_name: "Example Website BOOOP Docs"
+plugins:
+  - techdocs-core
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md

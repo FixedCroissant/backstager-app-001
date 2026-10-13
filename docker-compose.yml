@@ -47,6 +47,11 @@ services:
     volumes:
       # Persist dynamically generated TechDocs or cached data
       - backstage_data:/app/data
+      # Mount local catalog entries so they can be edited live
+      - ./examples:/app/examples
+      # Mount both config files; production config is also passed at startup.
+      - ./app-config.yaml:/app/app-config.yaml
+      - ./app-config.production.yaml:/app/app-config.production.yaml
 
 volumes:
   postgres_data:
